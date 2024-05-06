@@ -1,14 +1,20 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
-contract Counter {
+import {IGmpReceiver} from "@analog-gmp/interfaces/IGmpReceiver.sol";
+import {IGateway} from "@analog-gmp/interfaces/IGateway.sol";
+
+contract Counter is IGmpReceiver {
+    address private immutable _gateway;
     uint256 public number;
 
-    function setNumber(uint256 newNumber) public {
-        number = newNumber;
+    constructor(address gateway) {
+        _gateway = gateway;
     }
 
-    function increment() public {
+    function onGmpReceived(bytes32, uint128, bytes32, bytes calldata) external payable returns (bytes32) {
+        require(msg.sender == _gateway, "unauthorized");
         number++;
+        return bytes32(number);
     }
 }
